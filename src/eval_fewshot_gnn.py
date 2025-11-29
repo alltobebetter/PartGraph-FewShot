@@ -245,7 +245,7 @@ def evaluate(args):
             gnn_start_iter=args.gnn_start_iter
         )
         model = GNNPartAutoEncoder(backbone, slot_attn, 
-                                   SlotDecoder(args.slot_dim, (14,14), 4)).to(device)
+                                   SlotDecoder(slot_dim=args.slot_dim, resolution=(14,14))).to(device)
     else:
         print("\n=== Baseline Slot Attention (no GNN) ===")
         slot_attn = PartAwareSlotAttention(
@@ -255,7 +255,7 @@ def evaluate(args):
             iters=args.slot_iters
         )
         model = BaselineAutoEncoder(backbone, slot_attn,
-                                    SlotDecoder(args.slot_dim, (14,14), 4)).to(device)
+                                    SlotDecoder(slot_dim=args.slot_dim, resolution=(14,14))).to(device)
     
     # Load checkpoint
     if args.checkpoint and os.path.exists(args.checkpoint):
