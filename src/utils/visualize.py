@@ -13,8 +13,8 @@ def visualize_slots(image, recon, attn_masks, save_path=None):
     inv_transform = get_cub_inverse_transform()
     
     # Un-normalize images
-    image = inv_transform(image).clamp(0, 1).cpu().permute(1, 2, 0).numpy()
-    recon = inv_transform(recon).clamp(0, 1).cpu().permute(1, 2, 0).numpy()
+    image = inv_transform(image).clamp(0, 1).detach().cpu().permute(1, 2, 0).numpy()
+    recon = inv_transform(recon).clamp(0, 1).detach().cpu().permute(1, 2, 0).numpy()
     
     # Process attention masks
     K = attn_masks.shape[0]
