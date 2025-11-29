@@ -1,8 +1,7 @@
 # PartGraph-FewShot Project Status
 
 **Date**: 2025-11-29  
-**Stage**: V2 Multi-task Learning  
-**Status**: ✅ Milestone Achieved
+**Status**: ✅ Part Discovery Milestone Achieved
 
 ---
 
@@ -12,9 +11,9 @@
 |--------|----------------------|
 | Random Guess | 20.00% |
 | Baseline (ResNet) | 58.x% |
-| **V2 Slot Attention** | **88.6%** ✅ |
+| **PartGraph (Slot Attention)** | **88.6%** ✅ |
 
-V2 多任务学习方案验证成功，Slot Attention 学到了有判别性的部件表征。
+多任务学习方案验证成功，Slot Attention 学到了有判别性的部件表征。
 
 ---
 
