@@ -260,7 +260,7 @@ if __name__ == "__main__":
     parser.add_argument('--output_dir', type=str, default='./checkpoints_gnn_slot')
     parser.add_argument('--batch_size', type=int, default=32)
     parser.add_argument('--epochs', type=int, default=50)
-    parser.add_argument('--lr', type=float, default=1e-4)
+    parser.add_argument('--lr', type=float, default=5e-5)  # 降低学习率防止NaN
     
     # Slot 参数
     parser.add_argument('--num_slots', type=int, default=8)

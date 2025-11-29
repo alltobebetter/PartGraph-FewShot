@@ -82,7 +82,9 @@ class SlotGNNLayer(nn.Module):
         out = self.out_proj(out)
         
         # 残差 + LayerNorm
-        return self.norm(slots + out)
+        out = self.norm(slots + out)
+        # 数值稳定性
+        return torch.clamp(out, -100, 100)
 
 
 class GNNInLoopSlotAttention(nn.Module):
@@ -171,8 +173,8 @@ class GNNInLoopSlotAttention(nn.Module):
         pos_j = positions.unsqueeze(1)
         
         delta = pos_j - pos_i  # 相对位置 (dx, dy)
-        dist = torch.norm(delta, dim=-1, keepdim=True)  # 距离
-        angle = torch.atan2(delta[..., 1:2], delta[..., 0:1])  # 角度
+        dist = torch.norm(delta + 1e-8, dim=-1, keepdim=True)  # 距离，加eps防止0
+        angle = torch.atan2(delta[..., 1:2] + 1e-8, delta[..., 0:1] + 1e-8)  # 角度
         
         # 语义关系（slot 表征的相似度）
         slots_norm = F.normalize(slots, dim=-1)
@@ -233,6 +235,9 @@ class GNNInLoopSlotAttention(nn.Module):
             )
             slots = slots.reshape(b, -1, d)
             slots = slots + self.mlp(self.norm_pre_ff(slots))
+            
+            # 数值稳定性：clamp 防止爆炸
+            slots = torch.clamp(slots, -100, 100)
             
             # GNN 消息传递（核心创新！）
             # 从第 gnn_start_iter 次迭代开始，让 slot 之间交互
