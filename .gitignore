@@ -7,4 +7,7 @@ __pycache__/
 venv/
 env/
 *.tgz
-data/
+# data/  <-- Commented out to allow src/data/ creation if it was blocked, but usually data/ folder is ignored, not src/data
+# Let's be specific
+data/raw/
+data/processed/
