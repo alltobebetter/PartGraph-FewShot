@@ -178,7 +178,7 @@ class GNNInLoopSlotAttention(nn.Module):
         slots_norm = F.normalize(slots, dim=-1)
         similarity = torch.bmm(slots_norm, slots_norm.transpose(1, 2))  # (B, K, K)
         
-        # 拼接边特征
+        # 拼接边特征 (共 8 维)
         edge_attr = torch.cat([
             delta,                          # (B, K, K, 2) 相对位置
             dist,                           # (B, K, K, 1) 距离
@@ -186,6 +186,7 @@ class GNNInLoopSlotAttention(nn.Module):
             similarity.unsqueeze(-1),       # (B, K, K, 1) 语义相似度
             (dist < 0.3).float(),           # (B, K, K, 1) 是否邻近
             (dist < 0.15).float(),          # (B, K, K, 1) 是否很近
+            (dist < 0.5).float(),           # (B, K, K, 1) 是否中等距离
         ], dim=-1)  # (B, K, K, 8)
         
         return edge_attr
