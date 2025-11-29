@@ -12,10 +12,14 @@ class SlotAttention(nn.Module):
         self.eps = eps
         self.scale = dim ** -0.5
 
-        self.slots_mu = nn.Parameter(torch.randn(1, 1, dim))
-        self.slots_sigma = nn.Parameter(torch.abs(torch.randn(1, 1, dim)))
-        self.slots_mu.data.normal_(0, 1)
-        self.slots_sigma.data.fill_(-1) # Initialize log_sigma
+        # 改进的初始化：每个 slot 有独立的初始化
+        self.slots_mu = nn.Parameter(torch.zeros(1, num_slots, dim))
+        self.slots_sigma = nn.Parameter(torch.zeros(1, num_slots, dim))
+        
+        # Xavier 初始化，让不同 slot 有不同的起点
+        nn.init.xavier_uniform_(self.slots_mu)
+        nn.init.xavier_uniform_(self.slots_sigma)
+        self.slots_sigma.data = self.slots_sigma.data.abs() + 0.1  # 确保正值
 
         self.to_q = nn.Linear(dim, dim)
         self.to_k = nn.Linear(dim, dim)
@@ -41,9 +45,11 @@ class SlotAttention(nn.Module):
         b, n, d = inputs.shape
         n_s = num_slots if num_slots is not None else self.num_slots
         
-        mu = self.slots_mu.expand(b, n_s, -1)
-        sigma = self.slots_sigma.exp().expand(b, n_s, -1)
-        slots = mu + sigma * torch.randn_like(mu)
+        # 改进：使用学习到的初始化，加小噪声
+        mu = self.slots_mu.expand(b, -1, -1)
+        sigma = self.slots_sigma.expand(b, -1, -1)
+        noise = torch.randn(b, n_s, d, device=inputs.device) * 0.1
+        slots = mu + sigma * noise
 
         inputs = self.norm_input(inputs)        
         k = self.to_k(inputs)
