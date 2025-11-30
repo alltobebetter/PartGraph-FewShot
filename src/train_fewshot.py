@@ -138,6 +138,10 @@ def train(args):
     os.makedirs(args.output_dir, exist_ok=True)
     
     best_acc = 0
+    high_acc_count = 0  # 连续高准确率计数
+    early_stop_threshold = 99.0  # 早停阈值
+    early_stop_patience = 3  # 连续几次达到阈值就停止
+    
     for epoch in range(args.epochs):
         model.train()
         classifier.train()
@@ -224,6 +228,16 @@ def train(args):
                 'classifier': classifier.state_dict(),
                 'args': vars(args)
             }, os.path.join(args.output_dir, f'model_epoch_{epoch+1}.pth'))
+        
+        # Early stopping: 连续 N 次准确率 >= 99% 就停止
+        if acc >= early_stop_threshold:
+            high_acc_count += 1
+            print(f"  [Early Stop] ACC >= {early_stop_threshold}% ({high_acc_count}/{early_stop_patience})")
+            if high_acc_count >= early_stop_patience:
+                print(f"\n🛑 Early stopping triggered! ACC >= {early_stop_threshold}% for {early_stop_patience} consecutive epochs.")
+                break
+        else:
+            high_acc_count = 0  # 重置计数
     
     print(f"\nTraining complete. Best accuracy: {best_acc:.2f}%")
     print(f"Note: This accuracy is on BASE classes. Run eval_fewshot_novel.py for true few-shot evaluation on NOVEL classes.")
